@@ -11,7 +11,7 @@ minimal installers, checksums, and required licenses. Application source and
 operator credentials stay private. The executable includes its Node runtime;
 targets need no GitHub login, npm installation, or private clone.
 
-[Release 1.0.12](https://github.com/isiliconx/infinity-codex-releases/releases/tag/v1.0.12)
+[Release 1.0.13](https://github.com/isiliconx/infinity-codex-releases/releases/tag/v1.0.13)
 currently covers **Linux x64**. Windows/macOS/arm64 binaries await native
 validation. Each release's `RELEASE-TARGETS.txt` lists its available targets.
 
@@ -52,15 +52,21 @@ Cloudflare login, or record decryption key. The operator keeps that private key
 on their own computer to recover encrypted USB or cloud records.
 
 Targets must be awake and connected. Desktop tools need an interactive session
-and the appropriate OS screen/input approvals. Native Linux desktop input is
-not yet supported; file, command, and configured browser tools can operate.
+and the appropriate OS screen/input approvals. Linux X11 desktop observation and input are included; Wayland needs a separate
+native backend. Accessibility references are unavailable. Unicode typing can
+replace the clipboard when clipboardWrite is enabled and reports that change; file, command, and configured browser tools can operate.
 Installation does not change sleep settings or bypass elevation.
 
 ## Verification
 
-Release 1.0.12 passed compiled Linux OAuth/MCP and core tool checks, the actual
+Release 1.0.13 passed 167 local test files, compiled Linux OAuth/MCP and core tool
+checks, the actual
 USB consent/startup flow, encrypted export/decryption, USB removal, loopback
-gateway restart/reconnect, and live Cloudflare HTTPS/WSS, idle keepalives, cloud
-export, and revocation. Anonymous installation from the public URL matched the
+gateway restart/reconnect, and native X11 screenshot, scaled mouse/keyboard
+input, Unicode clipboard transfer, stale-frame checks and execution receipts.
+A gateway call through an actual USB-enrolled agent reached the real isolated
+X11 window. The same executable passed a disposable live Cloudflare gateway with native
+HTTPS/WSS desktop calls after USB removal, idle keepalives, encrypted
+export/decryption and revocation. The validation Worker was deleted. Anonymous installation from the public URL matched the
 verified checksum. No signed-in ChatGPT/Claude conversation or Windows/macOS
 native desktop flow was tested.
