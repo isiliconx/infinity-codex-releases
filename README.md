@@ -11,20 +11,34 @@ minimal installers, checksums, and required licenses. Application source and
 operator credentials stay private. The executable includes its Node runtime;
 targets need no GitHub login, npm installation, or private clone.
 
-[Release 1.0.14](https://github.com/isiliconx/infinity-codex-releases/releases/tag/v1.0.14)
-currently covers **Linux x64**. Windows/macOS/arm64 binaries await native
-validation. Each release's `RELEASE-TARGETS.txt` lists its available targets.
+[Release 1.0.15](https://github.com/isiliconx/infinity-codex-releases/releases/tag/v1.0.15)
+covers **Windows x64 and Linux x64**. Windows uses executable 1.0.15; Linux
+retains the unchanged, previously verified 1.0.14 executable. macOS and ARM
+binaries await native validation. Each release's `RELEASE-TARGETS.txt` lists its available targets.
 
 ## One-liner
 
-The operator provides a gateway address and one unused enrollment code. On
+The operator provides a gateway address and an enrollment code. A configured
+self-hosted gateway can use a permanent standing code. On
 Linux x64, run:
 
 ```sh
 curl -fsSL https://github.com/isiliconx/infinity-codex-releases/releases/latest/download/install.sh | sh
 ```
 
-The installer verifies the executable, asks for enrollment details, confirms
+On Windows x64, paste this into PowerShell with your self-hosted gateway address
+and standing code:
+
+```powershell
+& ([scriptblock]::Create((irm 'https://github.com/isiliconx/infinity-codex-releases/releases/latest/download/install.ps1'))) -GatewayUrl 'https://YOUR-GATEWAY' -EnrollmentCode 'YOUR_7_DIGIT_CODE' -Yes
+```
+
+This installs under the signed-in account, exchanges the code for a temporary
+enrollment file, and starts the background agent without terminal questions.
+`-Yes` explicitly selects computer access under that account's permissions.
+OS execution and elevation approvals still apply.
+
+The Linux installer verifies the executable, asks for enrollment details, confirms
 computer access, registers startup, and waits for a real background connection.
 You can close the terminal after completion. Its encrypted connection record is
 saved in the hosted gateway's private cloud database. An existing identity and
@@ -43,6 +57,11 @@ on the stick. **Remove the USB when completion says it is safe.** The agent
 continues from the computer's own storage. Insertion alone does not bypass OS
 execution approval. Copying is offline; enrollment and remote control need
 internet. Replace tickets after use or expiry.
+
+For Windows x64, use its USB archive, put the prepared `enrollment.json` beside
+`GO.cmd`, and launch `GO.cmd`. The prepared Windows launcher needs no gateway
+address, code, or terminal consent entry. It preserves unrelated files and uses
+normal OS permissions.
 
 ## Connection details
 
@@ -76,4 +95,11 @@ text/click actions and stale/disabled/app-policy checks. Wayland protocol tests
 used a private portal fixture with real PipeWire frames; real GTK accessibility
 passed on isolated Weston. These do not establish native portal consent or
 compositor pointer/keyboard delivery. No signed-in ChatGPT/Claude conversation
-or Windows/macOS/ARM native flow was tested.
+or macOS/ARM native flow was tested.
+
+Windows 1.0.15 validation runs on Windows x64. It covers the production build,
+PowerShell 5 installer and USB launcher, checksum rejection and file preservation,
+packaged OAuth/MCP and core tools, DPAPI settings, registered startup, background
+enrollment through a standing code, a gateway-routed fixture-file read, and
+Windows capture backend status. This does not establish native desktop input
+or a signed-in ChatGPT/Claude conversation on another computer.
