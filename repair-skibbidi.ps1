@@ -2,10 +2,8 @@ param([switch]$AuditOnly)
 
 $ErrorActionPreference = 'Stop'
 $ProgressPreference = 'SilentlyContinue'
-$expectedMachine = 'SKIBBIDI'
-if ($env:COMPUTERNAME -ine $expectedMachine) {
-  throw "This recovery is for Skibbidi, not $env:COMPUTERNAME."
-}
+# The gateway label is user-defined and may differ from Windows' COMPUTERNAME.
+# Verify the account-scoped enrollment below, not the hostname.
 
 $who = [Security.Principal.WindowsIdentity]::GetCurrent()
 $profile = $env:USERPROFILE
