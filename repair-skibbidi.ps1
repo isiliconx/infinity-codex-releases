@@ -21,6 +21,37 @@ Write-Host "Scheduled task: $(if ($task) { $task.State } else { 'missing' })"
 Write-Host "Windows last boot: $((Get-CimInstance Win32_OperatingSystem).LastBootUpTime)"
 Write-Host 'The last remote disconnect reason is not determined from the gateway alone.'
 
+function Get-InfinityExecutableVersion {
+  param([Parameter(Mandatory = $true)][string]$Executable)
+  $start = New-Object System.Diagnostics.ProcessStartInfo
+  $start.FileName = $Executable
+  $start.Arguments = '--version'
+  $start.UseShellExecute = $false
+  $start.CreateNoWindow = $true
+  $start.RedirectStandardOutput = $true
+  $start.RedirectStandardError = $true
+  $process = [System.Diagnostics.Process]::Start($start)
+  if (-not $process) { throw 'Unable to start the Infinity executable.' }
+  try {
+    # PowerShell 5.1 promotes native stderr warnings to terminating errors under Stop.
+    # Read both streams via .NET, and use the exit code as the success criterion.
+    $stdout = $process.StandardOutput.ReadToEndAsync()
+    $stderr = $process.StandardError.ReadToEndAsync()
+    if (-not $process.WaitForExit(15000)) {
+      $process.Kill()
+      throw 'Infinity --version timed out. Enrollment preserved.'
+    }
+    if ($process.ExitCode -ne 0) {
+      throw "Infinity --version exited $($process.ExitCode). Enrollment preserved."
+    }
+    $version = @([string]$stdout.Result -split "\r?\n" | Where-Object { $_.Trim() }) | Select-Object -First 1
+    if (-not $version) { throw 'Infinity --version returned no version text. Enrollment preserved.' }
+    return ([string]$version).Trim()
+  } finally {
+    $process.Dispose()
+  }
+}
+
 if ($AuditOnly) { return }
 if (-not (Test-Path -LiteralPath $config -PathType Leaf)) {
   throw 'The existing enrollment file is absent for this Windows account. No new enrollment will be attempted. Verify you are signed in as the original owner.'
@@ -47,9 +78,8 @@ if (-not (Test-Path -LiteralPath $binary -PathType Leaf)) {
 }
 if (-not (Test-Path -LiteralPath $binary -PathType Leaf)) { throw "No compiled Infinity executable at $binary after verified installation." }
 
-$version = & $binary --version 2>&1
-if ($LASTEXITCODE -ne 0) { throw 'The Infinity executable did not pass its version check. Enrollment preserved.' }
-Write-Host "Infinity executable version: $($version | Select-Object -First 1)"
+$version = Get-InfinityExecutableVersion -Executable $binary
+Write-Host "Infinity executable version: $version"
 
 New-Item -ItemType Directory -Path $logDir -Force | Out-Null
 if ($task) {
